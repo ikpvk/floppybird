@@ -120,7 +120,7 @@ function fitPlayfield()
 }
 
 //Animates `el` to the styles in `to` (from its current styles) and leaves `to` applied.
-//Any earlier animation on the element is cancelled, so its `done` callback never runs.
+//An earlier tween on the element is cancelled, so its `done` callback never runs.
 function tween(elem, to, duration, easing, done, from)
 {
    if(!from)
@@ -130,11 +130,22 @@ function tween(elem, to, duration, easing, done, from)
       for(var key in to)
          from[key] = computed[key];
    }
-   elem.getAnimations().forEach(function(anim) { anim.cancel(); });
+   cancelTween(elem);
    Object.assign(elem.style, to);
-   var anim = elem.animate([from, to], { duration: duration, easing: easing });
+   elem.tween = elem.animate([from, to], { duration: duration, easing: easing });
    if(done)
-      anim.onfinish = done;
+      elem.tween.onfinish = done;
+}
+
+//Cancels only the tween started by tween(), not CSS animations such as the bird's wings
+//(elem.getAnimations() would include those too).
+function cancelTween(elem)
+{
+   if(elem.tween)
+   {
+      elem.tween.cancel();
+      elem.tween = null;
+   }
 }
 
 //high score storage: validated as a whole nonnegative safe integer, else 0
@@ -186,7 +197,7 @@ function showSplash()
    ticks = 0;
 
    //update the player in preparation for the next game
-   el.player.getAnimations().forEach(function(anim) { anim.cancel(); });
+   cancelTween(el.player);
    updatePlayer();
 
    playSound(soundSwoosh);
@@ -535,7 +546,7 @@ function showScore()
    playSound(soundSwoosh);
 
    //show the scoreboard: slide it up from 40px below
-   el.replay.getAnimations().forEach(function(anim) { anim.cancel(); });
+   cancelTween(el.replay);
    Object.assign(el.replay.style, { transform: "translateY(40px)", opacity: "0" });
    tween(el.scoreboard, { transform: "translateY(0px)", opacity: "1" }, 600, "ease", function() {
       //When the animation is done, animate in the replay button and SWOOSH!

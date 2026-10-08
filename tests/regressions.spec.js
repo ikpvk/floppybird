@@ -68,3 +68,34 @@ test('the big score counts points during a round', async function({ page }) {
    await h.tick(page);
    expect(await h.shownDigits(page, '#bigscore')).toBe('1');
 });
+
+test.describe('The bird flaps its wings', function() {
+   function wingState(page) {
+      return page.locator('#player').evaluate(function(el) {
+         var wing = el.getAnimations().filter(function(a) { return a.animationName === 'animBird'; })[0];
+         return wing ? wing.playState : 'missing';
+      });
+   }
+
+   test('on the splash screen and during a round', async function({ page }) {
+      await h.openGame(page);
+      expect(await wingState(page)).toBe('running');
+      await h.startGame(page);
+      expect(await wingState(page)).toBe('running');
+   });
+
+   test('stops on death and resumes after replay', async function({ page }) {
+      await h.openGame(page);
+      await h.startGame(page);
+      await expect.poll(function() { return h.getState(page); }, { timeout: 6000 }).toBe(STATE.Score);
+      expect(await wingState(page)).toBe('paused');
+      await expect.poll(function() {
+         return page.evaluate(function() { return window.replayclickable; });
+      }, { timeout: 6000 }).toBe(true);
+      await page.locator('#replay').click();
+      await expect.poll(function() { return h.getState(page); }, { timeout: 4000 }).toBe(STATE.Splash);
+      expect(await wingState(page)).toBe('running');
+      await h.startGame(page);
+      expect(await wingState(page)).toBe('running');
+   });
+});
