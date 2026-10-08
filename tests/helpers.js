@@ -63,9 +63,10 @@ function getState(page) {
    return page.evaluate(function() { return window.currentstate; });
 }
 
-// A left click inside the fly area.
+// A left click inside the fly area, at (150, 300) in unscaled fly area pixels.
 async function clickGame(page, options) {
-   await page.locator('#flyarea').click(Object.assign({ position: { x: 150, y: 300 } }, options));
+   const scale = (await flyAreaGeometry(page)).scale;
+   await page.locator('#flyarea').click(Object.assign({ position: { x: 150 * scale, y: 300 * scale } }, options));
 }
 
 async function startGame(page) {
@@ -74,7 +75,7 @@ async function startGame(page) {
 }
 
 // Runs exactly one game-loop tick (requires `clock: true`).
-// The current loop is setInterval(gameloop, 1000/60); one 17ms step fires it once.
+// The loop is setInterval(gameloop, 1000/60); one 17ms step fires it once.
 async function tick(page) {
    await page.clock.runFor(17);
 }
@@ -98,13 +99,9 @@ function getBird(page) {
 // edge) whose gap starts `gapTop` px below the top of the fly area.
 async function placePipe(page, pipe) {
    await page.evaluate(function(p) {
-      $('.pipe').remove();
+      window.pipes.forEach(function(pipe) { pipe.el.remove(); });
       window.pipes = [];
-      window.updatePipes();
-      var el = window.pipes[0];
-      el.css({ animation: 'none', '-webkit-animation': 'none', left: p.left + 'px' });
-      el.children('.pipe_upper').css('height', p.gapTop + 'px');
-      el.children('.pipe_lower').css('height', (window.flyArea - window.pipeheight - p.gapTop) + 'px');
+      window.createPipe(p.left, p.gapTop);
    }, pipe);
 }
 

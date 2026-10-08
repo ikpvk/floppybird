@@ -49,22 +49,6 @@
    to { background-position: 0px -96px; }
 }
 
-@-webkit-keyframes animPipe {
-   0% { left: 900px; }
-   100% { left: -100px; }
-}
-@-moz-keyframes animPipe {
-   0% { left: 900px; }
-   100% { left: -100px; }
-}
-@-o-keyframes animPipe {
-   0% { left: 900px; }
-   100% { left: -100px; }
-}
-@keyframes animPipe {
-   0% { left: 900px; }
-   100% { left: -100px; }
-}
 
 @-webkit-keyframes animCeiling {
    0% { background-position: 0px 0px; }
@@ -92,8 +76,6 @@
    -moz-box-sizing: border-box;
    -webkit-box-sizing: border-box;
    box-sizing: border-box;
-   /* gpu acceleration */
-   -webkit-transition: translate3d(0,0,0);
    /* select disable */
    -webkit-touch-callout: none;
    -webkit-user-select: none;
@@ -119,6 +101,10 @@ body
    width: 100%;
    height: 100%;
    min-height: 525px;
+   /* scaled down by fitPlayfield() on shorter viewports */
+   transform-origin: 0 0;
+   /* keep pinch zoom, but skip double-tap zoom so quick taps all flap */
+   touch-action: manipulation;
 }
 
 /*
@@ -236,11 +222,13 @@ Screen - Game
 #currentscore
 {
    position: absolute;
+   display: flex;
+   justify-content: flex-end;
+   align-items: center;
    top: 105px;
    left: 107px;
    width: 104px;
    height: 14px;
-   text-align: right;
 }
 
 #currentscore img
@@ -251,11 +239,13 @@ Screen - Game
 #highscore
 {
    position: absolute;
+   display: flex;
+   justify-content: flex-end;
+   align-items: center;
    top: 147px;
    left: 107px;
    width: 104px;
    height: 14px;
-   text-align: right;
 }
 
 #highscore img
@@ -283,6 +273,7 @@ Screen - Game
    width: 0;
    height: 0;
    border: 1px solid red;
+   z-index: 1100;
 }
 
 #player
@@ -305,13 +296,11 @@ Screen - Game
 .pipe
 {
    position: absolute;
-   left: -100px;
+   top: 0;
+   left: 0;
    width: 52px;
    height: 100%;
    z-index: 10;
-
-   -webkit-animation: animPipe 7500ms linear;
-   animation: animPipe 7500ms linear;
 }
 
 .pipe_upper
