@@ -1,0 +1,11 @@
+{
+  "name": "floppybird",
+  "private": true,
+  "description": "Test harness for floppybird. The game itself has no build step.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0"
+  }
+}
